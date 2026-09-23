@@ -1,0 +1,12 @@
+# /etc/logrotate.d/monitoring-lab
+/var/log/monitoring-lab/*.log {
+    daily
+    rotate 14
+    maxsize 20M
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0640 root adm
+    dateext
+}

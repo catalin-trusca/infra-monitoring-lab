@@ -1,0 +1,27 @@
+groups:
+  - name: log-alerts
+    interval: 1m
+    rules:
+      - alert: WebappHigh5xxRate
+        expr: |
+          sum(rate({container="webapp"}
+            | pattern `<ip> - <_> [<_>] "<method> <path> <_>" <status> <_>`
+            | status >= 500 [5m]))
+          /
+          sum(rate({container="webapp"} [5m]))
+          > 0.05
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "webapp 5xx rate above 5%"
+          description: "More than 5% of webapp requests returned 5xx over the last 5 minutes."
+
+      - alert: SshBruteForceSuspected
+        expr: |
+          sum(count_over_time({job="varlogs", filename="/var/log/auth.log"} |~ "Failed password|Invalid user" [5m])) > 20
+        labels:
+          severity: warning
+        annotations:
+          summary: "Many failed SSH logins"
+          description: "More than 20 failed SSH authentication attempts in 5 minutes."

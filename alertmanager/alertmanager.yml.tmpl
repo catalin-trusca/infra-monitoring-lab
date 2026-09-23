@@ -1,0 +1,55 @@
+# Rendered to alertmanager.yml by scripts/render-alertmanager.sh (secrets come from .env)
+global:
+  resolve_timeout: 5m
+
+templates:
+  - /etc/alertmanager/templates/*.tmpl
+
+route:
+  receiver: telegram-warning
+  group_by: ["alertname", "instance"]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 12h
+  routes:
+    - matchers:
+        - severity="critical"
+      receiver: telegram-critical
+      group_wait: 10s
+      repeat_interval: 1h
+    - matchers:
+        - severity="warning"
+      receiver: telegram-warning
+
+inhibit_rules:
+  # If the host exporter is down, every other host alert is noise
+  - source_matchers:
+      - alertname="HostExporterDown"
+    target_matchers:
+      - severity=~"warning|critical"
+      - alertname!="HostExporterDown"
+    equal: ["instance"]
+  # Critical disk alert suppresses the warning one
+  - source_matchers:
+      - alertname="HostDiskSpaceCritical"
+    target_matchers:
+      - alertname="HostDiskSpaceLow"
+    equal: ["instance"]
+
+receivers:
+  - name: telegram-critical
+    telegram_configs:
+      - bot_token: "${TELEGRAM_BOT_TOKEN}"
+        chat_id: ${TELEGRAM_CHAT_ID}
+        parse_mode: HTML
+        send_resolved: true
+        message: '{{ template "telegram.message" . }}'
+
+  - name: telegram-warning
+    telegram_configs:
+      - bot_token: "${TELEGRAM_BOT_TOKEN}"
+        chat_id: ${TELEGRAM_CHAT_ID}
+        parse_mode: HTML
+        send_resolved: true
+        disable_notifications: true   # silent delivery for warnings
+        message: '{{ template "telegram.message" . }}'

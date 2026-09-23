@@ -1,0 +1,83 @@
+groups:
+  - name: host
+    rules:
+      - alert: HostExporterDown
+        expr: up{job="node"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "node-exporter unreachable on {{ $labels.instance }}"
+          description: "No host metrics for more than 1 minute."
+
+      - alert: HostHighCpuUsage
+        expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is {{ $value | printf \"%.1f\" }}% (threshold 85%) for 10 minutes."
+
+      - alert: HostHighLoad
+        expr: node_load5 / on (instance) count by (instance) (node_cpu_seconds_total{mode="idle"}) > 1.5
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High load average on {{ $labels.instance }}"
+          description: "5m load per core is {{ $value | printf \"%.2f\" }} (threshold 1.5)."
+
+      - alert: HostHighMemoryUsage
+        expr: (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Memory usage is {{ $value | printf \"%.1f\" }}% (threshold 90%)."
+
+      - alert: HostDiskSpaceLow
+        expr: node_filesystem_avail_bytes{mountpoint="/",fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{mountpoint="/",fstype!~"tmpfs|overlay"} * 100 < 15
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Root filesystem below 15% free on {{ $labels.instance }}"
+          description: "Only {{ $value | printf \"%.1f\" }}% free on /."
+
+      - alert: HostDiskSpaceCritical
+        expr: node_filesystem_avail_bytes{mountpoint="/",fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{mountpoint="/",fstype!~"tmpfs|overlay"} * 100 < 5
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Root filesystem almost full on {{ $labels.instance }}"
+          description: "Only {{ $value | printf \"%.1f\" }}% free on /."
+
+      - alert: HostDiskWillFillIn24h
+        expr: predict_linear(node_filesystem_avail_bytes{mountpoint="/",fstype!~"tmpfs|overlay"}[6h], 24 * 3600) < 0
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Root filesystem predicted to fill within 24h on {{ $labels.instance }}"
+          description: "Linear prediction over the last 6h reaches 0 bytes free within 24h."
+
+      - alert: SystemdUnitFailed
+        expr: node_systemd_unit_state{state="failed"} == 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "systemd unit {{ $labels.name }} failed on {{ $labels.instance }}"
+          description: "Check with: systemctl status {{ $labels.name }} / journalctl -u {{ $labels.name }}"
+
+      - alert: SshServiceNotActive
+        expr: node_systemd_unit_state{name="ssh.service",state="active"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "SSH daemon not active on {{ $labels.instance }}"
+          description: "ssh.service is not in active state."

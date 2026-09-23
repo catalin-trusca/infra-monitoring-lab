@@ -1,0 +1,7 @@
+[Unit]
+Description=Health check of monitoring stack endpoints
+After=monitoring-stack.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/monitoring-lab/scripts/healthcheck.sh
