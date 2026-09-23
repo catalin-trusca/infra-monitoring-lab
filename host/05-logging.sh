@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Persistent journald (needed by Promtail's journal scraper) + logrotate for lab logs
 source "$(dirname "$0")/lib.sh"; require_root
+apt-get install -y -qq logrotate
 HERE="$(cd "$(dirname "$0")" && pwd)"
 
 install -d /etc/systemd/journald.conf.d /var/log/journal

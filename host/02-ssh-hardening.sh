@@ -14,7 +14,7 @@ systemctl restart ssh
 log "sshd hardened (port $SSH_PORT). Effective settings:"
 sshd -T | grep -Ei '^(port|permitrootlogin|passwordauthentication|allowusers|maxauthtries) '
 
-apt-get update -qq && apt-get install -y -qq fail2ban
+apt-get update -qq && apt-get install -y -qq fail2ban python3-systemd
 sed "s/__SSH_PORT__/$SSH_PORT/" "$HERE/config/jail.local" > /etc/fail2ban/jail.local
 systemctl enable --now fail2ban
 systemctl restart fail2ban

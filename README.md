@@ -166,7 +166,20 @@ sudo systemctl stop ssh   # (from the console only!) -> SshServiceNotActive
 - Loki label cardinality: keep status codes and IPs out of stream labels; extract them at query time.
 - `for:` durations on alerts matter more than thresholds for avoiding flapping.
 - Inhibition rules turn one outage into one notification instead of ten.
+- Minimized cloud images: `logrotate` and `python3-systemd` (needed by fail2ban's systemd backend) are not preinstalled.
+- AppArmor on Ubuntu blocks D-Bus access from containers; node-exporter needs `apparmor:unconfined` for systemd unit metrics.
+- The VPS boots with the hardware clock 4h off until NTP syncs; the time jump breaks recent Prometheus/Loki data, so time sync must be verified before trusting metrics.
 
 ## Screenshots
 
-`docs/screenshots/` – host overview dashboard, logs dashboard, Telegram alert.
+### Host & Containers dashboard
+![Host overview](docs/screenshots/host-overview.png)
+
+### Logs dashboard (LogQL)
+![Logs overview](docs/screenshots/logs-overview.png)
+
+### Prometheus scrape targets
+![Prometheus targets](docs/screenshots/prometheus-targets.png)
+
+### Telegram alert
+![Telegram alert](docs/screenshots/telegram-alert.png)

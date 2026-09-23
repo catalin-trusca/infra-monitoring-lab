@@ -112,6 +112,8 @@ services:
     logging: *default-logging
 
   node-exporter:
+    security_opt:
+        - apparmor:unconfined
     image: prom/node-exporter:v1.8.2
     container_name: node-exporter
     command:
