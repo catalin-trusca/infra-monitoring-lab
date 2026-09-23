@@ -1,4 +1,4 @@
-﻿# Infrastructure Monitoring & Log Management â€“ Personal Lab
+# Infrastructure Monitoring & Log Management – Personal Lab
 
 Containerised monitoring and log management stack for a single Linux VPS, deployed with Docker Compose
 and managed by systemd. Collects host and container metrics, ships host/container/journal logs,
@@ -127,7 +127,7 @@ Queries are listed in [docs/logql-queries.md](docs/logql-queries.md).
 | SshBruteForceSuspected | **Loki ruler** (LogQL) | > 20 failed logins in 5m | warning |
 
 **Routing (Alertmanager):** alerts are grouped by `alertname` + `instance`.
-Critical â†’ Telegram with sound, repeat every 1h. Warning â†’ Telegram silent, repeat every 12h.
+Critical → Telegram with sound, repeat every 1h. Warning → Telegram silent, repeat every 12h.
 Resolved notifications are sent for both.
 **Inhibition:** `HostExporterDown` mutes all other alerts for the same instance;
 `HostDiskSpaceCritical` mutes `HostDiskSpaceLow`.
@@ -156,7 +156,7 @@ sudo systemctl stop ssh   # (from the console only!) -> SshServiceNotActive
 - **systemd:** `monitoring-stack.service` manages the Compose stack (start on boot, reload, clean stop);
   `monitoring-healthcheck.timer` runs an endpoint check every 5 minutes. A failed check fails the unit,
   which node-exporter exports and Prometheus turns into `SystemdUnitFailed`.
-- **Log rotation:** Docker json-file driver capped at 10 MB Ã— 3 per container (daemon + compose),
+- **Log rotation:** Docker json-file driver capped at 10 MB × 3 per container (daemon + compose),
   journald persistent and capped at 500 MB / 14 days, logrotate policy for `/var/log/monitoring-lab/*.log`
   (daily, 14 rotations, compressed, size cap 20 MB).
 
@@ -169,4 +169,4 @@ sudo systemctl stop ssh   # (from the console only!) -> SshServiceNotActive
 
 ## Screenshots
 
-`docs/screenshots/` â€“ host overview dashboard, logs dashboard, Telegram alert.
+`docs/screenshots/` – host overview dashboard, logs dashboard, Telegram alert.
